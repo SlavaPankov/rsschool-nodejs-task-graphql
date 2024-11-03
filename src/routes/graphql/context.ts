@@ -1,6 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { initializeDataLoaders } from './initializeDataLoaders.js';
+import { setupDataLoaders } from './setupDataLoaders.js';
 
-export type Context = { prisma: PrismaClient } & ReturnType<
-  typeof initializeDataLoaders
->;
+export type Context = { prisma: PrismaClient } & ReturnType<typeof setupDataLoaders>;

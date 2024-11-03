@@ -22,8 +22,4 @@ export const createGqlResponseSchema = {
   ),
 };
 
-export const graphQlSchema = new GraphQLSchema({
-  query: typeQuery,
-  mutation: typeMutation,
-  extensions: {},
-});
+export const graphQlSchema = new GraphQLSchema({query: typeQuery, mutation: typeMutation});

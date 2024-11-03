@@ -1,42 +1,14 @@
-import { GraphQLFieldConfig, GraphQLNonNull, GraphQLList, GraphQLType } from 'graphql';
-import { simplify, parseResolveInfo, ResolveTree } from 'graphql-parse-resolve-info';
+import { User } from '@prisma/client';
+import { GraphQLFieldConfig, GraphQLNonNull, GraphQLObjectType } from 'graphql';
+import { UUIDType } from '../../../types/uuid.js';
 import { Context } from '../../../context.js';
 import { typePerson } from '../typePerson.js';
-import { indexBy } from '../../../setupDataLoaders.js';
 
-export const usersQuery: GraphQLFieldConfig<unknown, Context> = {
-  type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(typePerson))),
-  resolve: async (_source, _args, ctx, info) => {
-    const parsedInfo = parseResolveInfo(info);
-    const { fields } = simplify(parsedInfo as ResolveTree, typePerson);
+export const userQuery: GraphQLFieldConfig<unknown, Context, { id: User['id'] }> = {
 
-    const needsSubscriptions = 'subscribedToUser' in fields;
+  type: typePerson as GraphQLObjectType,
+  
+  args: { id: { type: new GraphQLNonNull(UUIDType) } },
 
-    const needsFollowers = 'userSubscribedTo' in fields;
-
-    const users = await ctx.prisma.user.findMany({
-      include: {
-        subscribedToUser: needsSubscriptions,
-        userSubscribedTo: needsFollowers,
-      },
-    });
-    if (needsSubscriptions || needsFollowers) {
-      const usersMap = indexBy(users, (user) => user.id);
-      users.forEach((user) => {
-        if (needsSubscriptions) {
-          ctx.fetchSubscriptionsToUser.prime(
-            user.id,
-            user.subscribedToUser.map((relation) => usersMap[relation.subscriberId]),
-          );
-        }
-        if (needsFollowers) {
-          ctx.fetchUserSubscriptions.prime(
-            user.id,
-            user.userSubscribedTo.map((relation) => usersMap[relation.authorId]),
-          );
-        }
-      });
-    }
-    return users;
-  },
+  resolve: async (_, { id }, ctx: Context) => ctx.prisma.user.findUnique({ where: { id } }),
 };
