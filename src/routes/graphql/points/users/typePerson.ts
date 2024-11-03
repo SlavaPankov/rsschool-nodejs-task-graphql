@@ -9,7 +9,7 @@ import {
 import { UUIDType } from '../../types/uuid.js';
 import { Context } from '../../context.js';
 import { typePost } from '../posts/typePosts.js';
-import { typeProfile } from '../porfiles/typeProfile.js';
+import { typeProfile } from '../profiles/typeProfile.js';
 
 export const typePerson = new GraphQLObjectType<User, Context>({
   name: 'Person',
