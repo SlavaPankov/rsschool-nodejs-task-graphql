@@ -1,5 +1,5 @@
 import { User } from '@prisma/client';
-import { GraphQLFieldConfig, GraphQLNonNull, GraphQLBoolean } from 'graphql';
+import { GraphQLBoolean, GraphQLFieldConfig, GraphQLNonNull, GraphQLString } from 'graphql';
 import { Context } from '../../../context.js';
 import { UUIDType } from '../../../types/uuid.js';
 
@@ -23,23 +23,20 @@ export const unsubscribe: GraphQLFieldConfig<
   resolve: async (_, { userId, authorId }, ctx: Context) => {
     try {
       await ctx.prisma.subscribersOnAuthors.delete({
-        
-        
         where: {
-
           subscriberId_authorId: {
-
             subscriberId: userId,
             authorId: authorId,
-
           },
         },
       });
+
+      ctx.fetchUserSubscriptions.clear(userId);
+      ctx.fetchSubscriptionsToUser.clear(authorId);
       return true;
     } catch (error) {
       console.error('Error unsubscribing:', error);
       throw new Error('Unsubscription failed. Please try again later.');
-      return false;
     }
   },
 };
